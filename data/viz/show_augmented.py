@@ -1,8 +1,6 @@
 """Display augmented views produced by MoCo or DINO data transforms.
-
-Usage:
-  uv run python -m data.show_augmented --method moco
-  uv run python -m data.show_augmented --method dino
+  uv run python -m data.viz.show_augmented --method moco
+  uv run python -m data.viz.show_augmented --method dino
 """
 
 import argparse
@@ -15,7 +13,7 @@ import torch
 import yaml
 from PIL import Image
 
-from data.dataset import collect_image_paths
+from data.dataloader import collect_image_paths
 from ssl_methods.moco.data import get_moco_transforms
 from ssl_methods.dino.data import MultiCropTransform, get_dino_transforms
 
@@ -93,7 +91,7 @@ def show_dino(config: dict, paths: list[Path], out_path: Path) -> None:
     plt.show()
 
 
-def main() -> None:
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visualise SSL data augmentations")
     parser.add_argument("--method", choices=["moco", "dino"], required=True)
     args = parser.parse_args()
@@ -108,7 +106,3 @@ def main() -> None:
         show_moco(config, paths, out_path)
     else:
         show_dino(config, paths, out_path)
-
-
-if __name__ == "__main__":
-    main()
