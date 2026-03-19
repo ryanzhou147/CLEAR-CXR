@@ -90,8 +90,6 @@ def count_labels(data_dir: Path, val_frac: float, seed: int) -> None:
         pid for pid in by_patient
         if int(hashlib.md5(pid.encode()).hexdigest(), 16) % round(1 / val_frac) == 0
     }
-    patients = list(by_patient)
-
     train_counts: dict[str, int] = {}
     val_counts: dict[str, int] = {}
     for patient_id, samples in by_patient.items():
@@ -106,7 +104,7 @@ def count_labels(data_dir: Path, val_frac: float, seed: int) -> None:
     )
 
     n_val = len(val_patients)
-    print(f"\nPatients: {len(by_patient)} total  |  train={len(patients)-n_val}  val={n_val}")
+    print(f"\nPatients: {len(by_patient)} total  |  train={len(by_patient)-n_val}  val={n_val}")
     print(f"\n{'label':<45s}  {'train':>6s}  {'val':>5s}  {'total':>6s}  passes")
     print("-" * 75)
 
