@@ -74,6 +74,7 @@ if __name__ == "__main__":
         transform(Image.open(p).convert("RGB")) for p in paths
     ]).to(device)
 
+    torch.manual_seed(42)
     with torch.no_grad():
         _, pred, mask_px = model(imgs)
 
@@ -106,10 +107,11 @@ if __name__ == "__main__":
         pred_gray     = pred[i].mean(0).numpy()
         recon_display = (pred_gray * global_std + global_mean).clip(0, 1)
 
-        # Feather mask edges for composite
-        recon_smooth = gaussian_filter(recon_display, sigma=2.0)
-        soft_mask    = gaussian_filter(mask.astype(np.float32), sigma=3.0)
-        composite    = orig_full * (1 - soft_mask) + recon_smooth * soft_mask
+        # Feather only into masked patches: blur the mask then clamp to 0
+        # wherever the hard mask is 0, so visible patches stay pixel-exact
+        soft_mask = gaussian_filter(mask.astype(np.float32), sigma=2.0)
+        soft_mask = np.minimum(soft_mask, mask)   # no bleed into visible patches
+        composite = orig_full * (1 - soft_mask) + recon_display * soft_mask
 
         for col, display_img in enumerate([orig_full, composite]):
             axes[i, col].imshow(display_img, cmap="gray", vmin=0, vmax=1, aspect="auto")
