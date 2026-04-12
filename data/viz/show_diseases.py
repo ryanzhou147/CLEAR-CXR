@@ -10,23 +10,23 @@ import csv
 import gzip
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
 DEFAULT_LABELS = [
-    "bronchiectasis",
     "calcified granuloma",
-    "callus rib fracture",
-    "hiatal hernia",
     "interstitial pattern",
+    "callus rib fracture",
     "hemidiaphragm elevation",
+    "hiatal hernia",
+    "bronchiectasis",
     "fibrotic band",
-    "pulmonary fibrosis",
-    "pulmonary mass",
     "reticular interstitial pattern",
-    "pneumothorax",
-    "tuberculosis",
+    "pulmonary mass",
+    "pulmonary fibrosis",
 ]
 
 
@@ -73,9 +73,9 @@ def find_examples(
 
 
 def plot_grid(
-    found: dict[str, list[Path]], n: int, out: Path
+    found: dict[str, list[Path]], n: int, out: Path, order: list[str] | None = None
 ) -> None:
-    labels = sorted(found.keys())
+    labels = order if order is not None else sorted(found.keys())
     n_rows = len(labels)
     n_cols = n
 
@@ -109,12 +109,10 @@ def plot_grid(
                         transform=ax.transAxes, color="gray")
             ax.axis("off")
             if col_idx == 0:
-                ax.text(-0.05, 0.5, label, fontsize=9, transform=ax.transAxes,
+                ax.text(-0.05, 0.5, label.upper(), fontsize=14, transform=ax.transAxes,
                         va="center", ha="right")
 
-    plt.suptitle("PadChest Disease Examples", fontsize=13, fontweight="bold")
     plt.savefig(out, dpi=120, bbox_inches="tight")
-    plt.show()
     print(f"Saved to {out}")
 
 
@@ -135,5 +133,5 @@ if __name__ == "__main__":
     for label in sorted(found.keys()):
         print(f"  {label:<40s} {len(found[label])}/{args.n} found")
 
-    plot_grid(found, args.n, Path(args.out))
+    plot_grid(found, args.n, Path(args.out), order=args.labels)
 
